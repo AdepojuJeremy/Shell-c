@@ -72,6 +72,34 @@ int main() {
         }
 
         // If the command is not built-in, attempt to execute it
+        // First, check if the command exists in PATH
+        char *path = getenv("PATH");
+        int command_found = 0;
+        if (path != NULL) {
+            char pathCopy[1024];
+            strncpy(pathCopy, path, sizeof(pathCopy));
+            pathCopy[sizeof(pathCopy) - 1] = '\0'; // Ensure null termination
+
+            char *dir = strtok(pathCopy, ":");
+            char fullPath[150];
+
+            while (dir != NULL) {
+                snprintf(fullPath, sizeof(fullPath), "%s/%s", dir, input);
+                if (access(fullPath, X_OK) == 0) { // Check if the file is executable
+                    command_found = 1;
+                    break;
+                }
+                dir = strtok(NULL, ":");
+            }
+        }
+
+        // If the command is not found, print an error message
+        if (!command_found) {
+            printf("%s: command not found\n", input);
+            continue; // Skip the execution attempt
+        }
+
+        // Command was found, so now execute it
         pid_t pid = fork();
         if (pid == 0) {
             // Child process
