@@ -24,6 +24,13 @@ int main() {
             exit(0); // Exit the program with status 0
         }
 
+        // Check if the command starts with "echo"
+        if (strncmp(input, "echo ", 5) == 0) {
+            // Print the rest of the input after "echo "
+            printf("%s\n", input + 5);
+            continue; // Skip the rest of the loop and prompt again
+        }
+
         // Check if the command exists
         if (access(input, F_OK) == -1) {
             // Command not found
