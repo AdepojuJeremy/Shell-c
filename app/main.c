@@ -41,21 +41,29 @@ int main() {
             } else {
                 // Check if the command is an executable file in PATH
                 char *path = getenv("PATH");
-                char *dir = strtok(path, ":");
-                int found = 0;
+                if (path != NULL) {
+                    char pathCopy[1024];
+                    strncpy(pathCopy, path, sizeof(pathCopy));
+                    pathCopy[sizeof(pathCopy) - 1] = '\0'; // Ensure null termination
 
-                while (dir != NULL) {
-                    char fullPath[150];
-                    snprintf(fullPath, sizeof(fullPath), "%s/%s", dir, command);
-                    if (access(fullPath, X_OK) == 0) { // Check if the file is executable
-                        printf("%s is %s\n", command, fullPath);
-                        found = 1;
-                        break;
+                    char *dir = strtok(pathCopy, ":");
+                    int found = 0;
+
+                    while (dir != NULL) {
+                        char fullPath[150];
+                        snprintf(fullPath, sizeof(fullPath), "%s/%s", dir, command);
+                        if (access(fullPath, X_OK) == 0) { // Check if the file is executable
+                            printf("%s is %s\n", command, fullPath);
+                            found = 1;
+                            break;
+                        }
+                        dir = strtok(NULL, ":");
                     }
-                    dir = strtok(NULL, ":");
-                }
 
-                if (!found) {
+                    if (!found) {
+                        printf("%s: not found\n", command);
+                    }
+                } else {
                     printf("%s: not found\n", command);
                 }
             }
