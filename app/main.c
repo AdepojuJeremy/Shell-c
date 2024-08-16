@@ -72,33 +72,62 @@ int main() {
         }
 
         // If the command is not built-in, attempt to execute it
-        pid_t pid = fork();
-        if (pid == 0) {
-            // Child process
-            char *args[10];
-            int i = 0;
+        // First, check if the command exists in PATH
+        char *path = getenv("PATH");
+        if (path != NULL) {
+            char pathCopy[1024];
+            strncpy(pathCopy, path, sizeof(pathCopy));
+            pathCopy[sizeof(pathCopy) - 1] = '\0'; // Ensure null termination
 
-            // Tokenize the input string to handle arguments
-            char *token = strtok(input, " ");
-            while (token != NULL && i < 10) {
-                args[i++] = token;
-                token = strtok(NULL, " ");
+            char *dir = strtok(pathCopy, ":");
+            int found = 0;
+            char fullPath[150];
+
+            while (dir != NULL) {
+                snprintf(fullPath, sizeof(fullPath), "%s/%s", dir, input);
+                if (access(fullPath, X_OK) == 0) { // Check if the file is executable
+                    found = 1;
+                    break;
+                }
+                dir = strtok(NULL, ":");
             }
-            args[i] = NULL;
 
-            // Execute the command
-            execvp(args[0], args);
+            if (!found) {
+                printf("%s: command not found\n", input);
+                continue;
+            }
 
-            // If execvp fails, print an error message and exit
-            perror("execvp");
-            exit(1);
-        } else if (pid > 0) {
-            // Parent process: wait for the child to complete
-            int status;
-            waitpid(pid, &status, 0);
+            // Command was found, so now execute it
+            pid_t pid = fork();
+            if (pid == 0) {
+                // Child process
+                char *args[10];
+                int i = 0;
+
+                // Tokenize the input string to handle arguments
+                char *token = strtok(input, " ");
+                while (token != NULL && i < 10) {
+                    args[i++] = token;
+                    token = strtok(NULL, " ");
+                }
+                args[i] = NULL;
+
+                // Execute the command
+                execvp(args[0], args);
+
+                // If execvp fails, print an error message and exit
+                perror("execvp");
+                exit(1);
+            } else if (pid > 0) {
+                // Parent process: wait for the child to complete
+                int status;
+                waitpid(pid, &status, 0);
+            } else {
+                // Fork failed
+                perror("fork");
+            }
         } else {
-            // Fork failed
-            perror("fork");
+            printf("%s: command not found\n", input);
         }
     }
 
