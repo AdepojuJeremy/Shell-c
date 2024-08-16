@@ -31,6 +31,19 @@ int main() {
             continue; // Skip the rest of the loop and prompt again
         }
 
+        // Check if the command starts with "type"
+        if (strncmp(input, "type ", 5) == 0) {
+            char *command = input + 5;
+
+            // Check if the command is a known builtin
+            if (strcmp(command, "echo") == 0 || strcmp(command, "exit") == 0 || strcmp(command, "type") == 0) {
+                printf("%s is a shell builtin\n", command);
+            } else {
+                printf("%s: not found\n", command);
+            }
+            continue; // Skip the rest of the loop and prompt again
+        }
+
         // Check if the command exists
         if (access(input, F_OK) == -1) {
             // Command not found
