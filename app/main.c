@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 int main() {
     char input[100];
@@ -17,6 +18,11 @@ int main() {
 
         // Remove the newline character from the input
         input[strcspn(input, "\n")] = 0;
+
+        // Check if the command is "exit 0"
+        if (strcmp(input, "exit 0") == 0) {
+            exit(0); // Exit the program with status 0
+        }
 
         // Check if the command exists
         if (access(input, F_OK) == -1) {
