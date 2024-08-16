@@ -39,7 +39,25 @@ int main() {
             if (strcmp(command, "echo") == 0 || strcmp(command, "exit") == 0 || strcmp(command, "type") == 0) {
                 printf("%s is a shell builtin\n", command);
             } else {
-                printf("%s: not found\n", command);
+                // Check if the command is an executable file in PATH
+                char *path = getenv("PATH");
+                char *dir = strtok(path, ":");
+                int found = 0;
+
+                while (dir != NULL) {
+                    char fullPath[150];
+                    snprintf(fullPath, sizeof(fullPath), "%s/%s", dir, command);
+                    if (access(fullPath, X_OK) == 0) { // Check if the file is executable
+                        printf("%s is %s\n", command, fullPath);
+                        found = 1;
+                        break;
+                    }
+                    dir = strtok(NULL, ":");
+                }
+
+                if (!found) {
+                    printf("%s: not found\n", command);
+                }
             }
             continue; // Skip the rest of the loop and prompt again
         }
