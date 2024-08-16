@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 
 int main() {
     char input[100];
@@ -70,10 +71,34 @@ int main() {
             continue; // Skip the rest of the loop and prompt again
         }
 
-        // Check if the command exists
-        if (access(input, F_OK) == -1) {
-            // Command not found
-            printf("%s: command not found\n", input);
+        // If the command is not built-in, attempt to execute it
+        pid_t pid = fork();
+        if (pid == 0) {
+            // Child process
+            char *args[10];
+            int i = 0;
+
+            // Tokenize the input string to handle arguments
+            char *token = strtok(input, " ");
+            while (token != NULL && i < 10) {
+                args[i++] = token;
+                token = strtok(NULL, " ");
+            }
+            args[i] = NULL;
+
+            // Execute the command
+            execvp(args[0], args);
+
+            // If execvp fails, print an error message and exit
+            perror("execvp");
+            exit(1);
+        } else if (pid > 0) {
+            // Parent process: wait for the child to complete
+            int status;
+            waitpid(pid, &status, 0);
+        } else {
+            // Fork failed
+            perror("fork");
         }
     }
 
