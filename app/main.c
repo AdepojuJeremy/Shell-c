@@ -46,6 +46,16 @@ int main() {
             continue; // Skip the rest of the loop and prompt again
         }
 
+        // Check if the command is "cd"
+        if (strcmp(args[0], "cd") == 0) {
+            if (args[1] != NULL) {
+                if (chdir(args[1]) != 0) {
+                    printf("cd: %s: No such file or directory\n", args[1]);
+                }
+            }
+            continue; // Skip the rest of the loop and prompt again
+        }
+
         // Check if the command is "echo"
         if (strcmp(args[0], "echo") == 0) {
             // Print the arguments after "echo"
@@ -62,7 +72,7 @@ int main() {
             char *command = args[1];
 
             // Check if the command is a known builtin
-            if (strcmp(command, "echo") == 0 || strcmp(command, "exit") == 0 || strcmp(command, "type") == 0 || strcmp(command, "pwd") == 0) {
+            if (strcmp(command, "echo") == 0 || strcmp(command, "exit") == 0 || strcmp(command, "type") == 0 || strcmp(command, "pwd") == 0 || strcmp(command, "cd") == 0) {
                 printf("%s is a shell builtin\n", command);
             } else {
                 // Check if the command is an executable file in PATH
