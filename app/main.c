@@ -48,10 +48,17 @@ int main() {
 
         // Check if the command is "cd"
         if (strcmp(args[0], "cd") == 0) {
-            if (args[1] != NULL) {
-                if (chdir(args[1]) != 0) {
-                    printf("cd: %s: No such file or directory\n", args[1]);
+            char *dir = args[1];
+            if (dir == NULL || strcmp(dir, "~") == 0) {
+                // Change to home directory
+                dir = getenv("HOME");
+            }
+            if (dir != NULL) {
+                if (chdir(dir) != 0) {
+                    printf("cd: %s: No such file or directory\n", dir);
                 }
+            } else {
+                printf("cd: No home directory found\n");
             }
             continue; // Skip the rest of the loop and prompt again
         }
