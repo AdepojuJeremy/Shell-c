@@ -35,6 +35,17 @@ int main() {
             exit(0); // Exit the program with status 0
         }
 
+        // Check if the command is "pwd"
+        if (strcmp(args[0], "pwd") == 0) {
+            char cwd[1024];
+            if (getcwd(cwd, sizeof(cwd)) != NULL) {
+                printf("%s\n", cwd);
+            } else {
+                perror("getcwd() error");
+            }
+            continue; // Skip the rest of the loop and prompt again
+        }
+
         // Check if the command is "echo"
         if (strcmp(args[0], "echo") == 0) {
             // Print the arguments after "echo"
@@ -51,7 +62,7 @@ int main() {
             char *command = args[1];
 
             // Check if the command is a known builtin
-            if (strcmp(command, "echo") == 0 || strcmp(command, "exit") == 0 || strcmp(command, "type") == 0) {
+            if (strcmp(command, "echo") == 0 || strcmp(command, "exit") == 0 || strcmp(command, "type") == 0 || strcmp(command, "pwd") == 0) {
                 printf("%s is a shell builtin\n", command);
             } else {
                 // Check if the command is an executable file in PATH
